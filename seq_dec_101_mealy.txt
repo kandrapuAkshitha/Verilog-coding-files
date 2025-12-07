@@ -1,0 +1,83 @@
+
+module mealy(y,clk,clr,x);
+input clk,clr,x;
+output reg y;
+parameter s0=2'b00,s1=2'b01,s2=2'b10;
+reg [1:0] ps,ns;
+always @(posedge clk) begin
+if(clr) begin
+  ps<=s0;
+  y<=1'b0;
+end
+else 
+  ps<=ns;
+end
+always @(*) begin
+ case(ps)
+ s0:begin
+    if(x==1)
+        ns<=s1;
+    else 
+        ns<=s0;
+   end
+  s1:begin
+   if(x==1) 
+      ns<=s1;
+   else
+      ns<=s2;	
+   end
+  s2:begin
+    if(x==1)
+	ns<=s1;
+    else
+        ns<=s0;
+    end
+	default:ns<=s0;
+  endcase
+  case(ps)
+   s0:y=0;
+   s1:y=0;
+   s2:y=(x==1)?1:0;
+  endcase
+end
+endmodule
+
+testbench
+
+module mealy_tb;
+
+	// Inputs
+	reg clk;
+	reg clr;
+	reg x;
+
+	// Outputs
+	wire y;
+
+	// Instantiate the Unit Under Test (UUT)
+	mealy uut (
+		.y(y), 
+		.clk(clk), 
+		.clr(clr), 
+		.x(x)
+	);
+
+	initial begin
+		// Initialize Inputs
+		clk = 0;
+		clr = 1;
+		x = 0;
+ #10 clr=0;w
+ 
+    #2 x=1;
+	 #5 x=0;
+	 #3 x=1;
+	 #6 x=0;
+	 #4 x=1;
+	end
+      always #2 clk=~clk;
+		always #4 x=~x;
+		initial $monitor($time,"clk=%b,x=%b,y=%b",clk,x,y);
+		initial #100 $stop;
+endmodule
+
